@@ -5,7 +5,7 @@ import keras
                          
 
 class Feature_Extractor():
-    def load():
+    def load(self):
         model = keras.models.load_model('./model_features/CUSTOM_NET-500ep_b64_MaxP_DBCrop.h5')
         return model
 
