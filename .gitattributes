@@ -1,0 +1,2 @@
+model_features/CUSTOM_NET-500ep_b64_MaxP_DBCrop.h5 filter=lfs diff=lfs merge=lfs -text
+model_detection/ear_segmentation.onnx filter=lfs diff=lfs merge=lfs -text
