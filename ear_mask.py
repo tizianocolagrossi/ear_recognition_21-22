@@ -1,9 +1,5 @@
-from importlib.resources import path
+import onnxruntime
 import torchvision.transforms as transforms
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-import torch
-import torchvision
 import cv2
 import numpy as np
 import math
@@ -12,25 +8,23 @@ from PIL import Image
 ## class to import and execute onnx runtime for ead mask
 
 class Mask_RCNN():
+    
+    def _to_numpy(self, tensor):
+        return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
     def __init__(self, path_to_onnx):
-        self.model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
-        in_features = self.model.roi_heads.box_predictor.cls_score.in_features
-        self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, 3)
-        in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
-        self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask,256,3)
-        self.model.load_state_dict(torch.load('./model_detection/07-03-21_d2-1_b8-2_dsed_manseed_curr-bis_from40_ep50'))
-        self.model.eval()
-        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.path=path_to_onnx
+        self.ort_session = onnxruntime.InferenceSession(path_to_onnx)
     
     def __call__(self, image):
         to_tensor = transforms.ToTensor()
         tensor_img = to_tensor(image)
-        prediction = self.model([tensor_img.to(self.device)])
-        boxes = prediction[0]
-        label = prediction[1]
-        label_perc = prediction[2]
-        segmentation = prediction[3]
+        ort_inputs = {self.ort_session.get_inputs()[0].name: self._to_numpy(tensor_img)}
+        ort_outs = self.ort_session.run(None, ort_inputs)
+        boxes = ort_outs[0]
+        label = ort_outs[1]
+        label_perc = ort_outs[2]
+        segmentation = ort_outs[3]
         return (boxes, label, label_perc, segmentation)
 
 ## helper function to transform segmentation matrix to image
@@ -198,3 +192,4 @@ def get_ear_masked(path_input):
 
     return output
     
+img = get_ear_masked('./image/tiziano/t1.png')

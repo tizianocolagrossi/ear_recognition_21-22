@@ -23,6 +23,7 @@ class Feature_Extractor():
         return feature_vector
     
 
+img = get_ear_masked('./image/tiziano/t1.png')
     
 
 
