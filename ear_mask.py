@@ -19,7 +19,7 @@ class Mask_RCNN():
         self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, 3)
         in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
         self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask,256,3)
-        self.model.load_state_dict(torch.load('./model_detection/ear_segmentation.onnx'))
+        self.model.load_state_dict(torch.load('./model_detection/07-03-21_d2-1_b8-2_dsed_manseed_curr-bis_from40_ep50'))
         self.model.eval()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     
